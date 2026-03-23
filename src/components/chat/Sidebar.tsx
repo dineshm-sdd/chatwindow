@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
-import { Hash, MessageSquare, Settings as SettingsIcon, Plus, LogOut, BellOff, User as UserIcon } from 'lucide-react';
+import { Hash, MessageSquare, Settings as SettingsIcon, Plus, LogOut, BellOff } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface SidebarProps {
@@ -15,6 +15,8 @@ interface SidebarProps {
   onLogout: () => void;
 }
 
+import { useSettings } from '../../lib/SettingsContext';
+
 export const Sidebar: React.FC<SidebarProps> = ({ 
   channels,
   activeId, 
@@ -26,6 +28,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   onProfileClick,
   onLogout
 }) => {
+  const { settings } = useSettings();
   const [isAddingChannel, setIsAddingChannel] = useState(false);
   const [newChannelName, setNewChannelName] = useState('');
 
@@ -148,12 +151,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <button 
           onClick={onProfileClick}
           className={cn(
-            "w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
-            activeView === 'profile' ? "bg-accent text-accent-foreground" : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            "w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-300 group relative",
+            activeView === 'profile' 
+              ? "bg-primary text-white shadow-lg shadow-primary/20" 
+              : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           )}
         >
-          <UserIcon className="w-4 h-4" />
-          <span className="hidden @[240px]:block">My Profile</span>
+          <div className="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-800 flex items-center justify-center shrink-0 overflow-hidden ring-2 ring-transparent group-hover:ring-primary/30 transition-all">
+            {settings.userAvatar ? (
+              <img src={settings.userAvatar} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-[10px] font-bold text-slate-500">{settings.userName[0]}</span>
+            )}
+          </div>
+          <div className="hidden @[240px]:flex flex-col items-start min-w-0">
+            <span className="text-xs font-bold truncate w-full">{settings.userName}</span>
+            <span className="text-[10px] text-muted-foreground/60 truncate w-full">View Profile</span>
+          </div>
         </button>
         <button 
           onClick={onSettingsClick}

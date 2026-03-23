@@ -1,0 +1,23 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Shared messages collection
+    match /messages/{messageId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Profiles collection
+    match /users/{userId} {
+      // Allow anyone logged in to read public profiles (for chat display)
+      allow read: if request.auth != null;
+      // ONLY the user themselves can update their own profile
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Default: Deny everything else
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
