@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/components/auth/auth.tsx","./src/components/chat/chatwindow.tsx","./src/components/chat/profile.tsx","./src/components/chat/settings.tsx","./src/components/chat/sidebar.tsx","./src/lib/settingscontext.tsx","./src/lib/firebase.ts","./src/lib/utils.ts","./src/types/index.ts"],"version":"5.9.3"}

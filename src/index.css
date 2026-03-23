@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@layer base, components, utilities;
+
+@theme {
+  --color-background: oklch(0.985 0.002 247.839);
+  --color-foreground: oklch(0.129 0.042 264.695);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.129 0.042 264.695);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.129 0.042 264.695);
+  --color-primary: oklch(0.585 0.233 277.117);
+  --color-primary-foreground: oklch(0.985 0.002 247.839);
+  --color-secondary: oklch(0.967 0.003 264.542);
+  --color-secondary-foreground: oklch(0.208 0.042 265.755);
+  --color-muted: oklch(0.967 0.003 264.542);
+  --color-muted-foreground: oklch(0.554 0.046 257.417);
+  --color-accent: oklch(0.967 0.003 264.542);
+  --color-accent-foreground: oklch(0.208 0.042 265.755);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: oklch(0.985 0.002 247.839);
+  --color-border: oklch(0.922 0.011 266.387);
+  --color-input: oklch(0.922 0.011 266.387);
+  --color-ring: oklch(0.585 0.233 277.117);
+  --radius-lg: 0.75rem;
+  --radius-md: calc(0.75rem - 2px);
+  --radius-sm: calc(0.75rem - 4px);
+}
+
+.dark {
+  --color-background: oklch(0.141 0.005 285.823);
+  --color-foreground: oklch(0.985 0.002 247.839);
+  --color-card: oklch(0.129 0.042 264.695);
+  --color-card-foreground: oklch(0.985 0.002 247.839);
+  --color-popover: oklch(0.129 0.042 264.695);
+  --color-popover-foreground: oklch(0.985 0.002 247.839);
+  --color-primary: oklch(0.65 0.2 277);
+  --color-primary-foreground: oklch(0.985 0.002 247.839);
+  --color-secondary: oklch(0.25 0.05 264);
+  --color-secondary-foreground: oklch(0.985 0.002 247.839);
+  --color-muted: oklch(0.2 0.02 264);
+  --color-muted-foreground: oklch(0.7 0.02 264);
+  --color-accent: oklch(0.2 0.05 264);
+  --color-accent-foreground: oklch(0.985 0.002 247.839);
+  --color-destructive: oklch(0.4 0.2 25);
+  --color-destructive-foreground: oklch(0.985 0.002 247.839);
+  --color-border: oklch(0.2 0.02 264);
+  --color-input: oklch(0.2 0.02 264);
+  --color-ring: oklch(0.65 0.2 277);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    transition: font-size 0.2s ease;
+  }
+  
+  .text-small { font-size: 13px; }
+  .text-medium { font-size: 16px; }
+  .text-large { font-size: 19px; }
+
+  button, a {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-white/70 dark:bg-slate-950/70 backdrop-blur-md border border-white/20 dark:border-slate-800/20 shadow-xl;
+  }
+
+  .chat-bubble-received {
+    @apply bg-muted text-muted-foreground rounded-2xl rounded-tl-none px-4 py-2 max-w-[80%];
+  }
+
+  .chat-bubble-sent {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-tr-none px-4 py-2 max-w-[80%];
+  }
+}
