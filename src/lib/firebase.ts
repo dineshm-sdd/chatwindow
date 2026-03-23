@@ -4,12 +4,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Replace with your real Firebase config from the Firebase Console
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_STORAGE_BUCKET",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDjhu1ibPPdepGBE5DXh_1UkKzIXE2sx98",
+  authDomain: "chatwindow-ai.firebaseapp.com",
+  projectId: "chatwindow-ai",
+  storageBucket: "chatwindow-ai.firebasestorage.app",
+  messagingSenderId: "750536279977",
+  appId: "1:750536279977:web:455220a70bc3686bb9a6b8"
 };
 
 // Initialize Firebase

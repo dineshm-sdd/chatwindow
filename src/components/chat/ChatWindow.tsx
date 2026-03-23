@@ -16,6 +16,16 @@ import {
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { Message } from '../../types';
+import { db } from '../../lib/firebase';
+import { 
+  collection, 
+  addDoc, 
+  query, 
+  where, 
+  orderBy, 
+  onSnapshot,
+  serverTimestamp
+} from 'firebase/firestore';
 
 interface ChatWindowProps {
   id: string;
@@ -52,38 +62,65 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const q = query(
+      collection(db, 'messages'),
+      where('chatId', '==', id),
+      orderBy('timestamp', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const msgs = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          text: data.text,
+          senderId: data.senderId,
+          senderName: data.senderName,
+          timestamp: data.timestamp?.toDate() || new Date(),
+        } as Message;
+      });
+      onUpdateMessages(msgs);
+    });
+
+    return () => unsubscribe();
+  }, [id]);
+
+  useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!inputText.trim()) return;
     const text = inputText;
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text: text,
-      senderId: 'me',
-      senderName: 'Me',
-      timestamp: new Date(),
-    };
     
-    onUpdateMessages([...messages, newMessage]);
     setInputText('');
     setShowEmojiPicker(false);
 
-    if (!isChannel) {
-      setTimeout(() => {
-        const reply: Message = {
-          id: (Date.now() + 1).toString(),
-          text: `Thanks for your message: "${text}". I'll get back to you soon!`,
-          senderId: id,
-          senderName: name,
-          timestamp: new Date(),
-        };
-        // Note: This relies on the latest state from App
-        onUpdateMessages([...messages, newMessage, reply]);
-      }, 1500);
+    try {
+      await addDoc(collection(db, 'messages'), {
+        chatId: id,
+        text: text,
+        senderId: 'me',
+        senderName: 'Me',
+        timestamp: serverTimestamp(),
+      });
+
+      if (!isChannel) {
+        // Simple auto-reply simulation for DM
+        setTimeout(async () => {
+          await addDoc(collection(db, 'messages'), {
+            chatId: id,
+            text: `Thanks for your message: "${text}". I'll get back to you soon!`,
+            senderId: id,
+            senderName: name,
+            timestamp: serverTimestamp(),
+          });
+        }, 1500);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
   };
 

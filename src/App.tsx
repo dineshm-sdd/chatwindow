@@ -2,10 +2,13 @@ import * as React from 'react';
 import { useState, useEffect } from 'react';
 import { Sidebar } from './components/chat/Sidebar';
 import { ChatWindow } from './components/chat/ChatWindow';
-import { Settings } from './components/chat/Settings';
+import { Settings } from './components/chat/Settings.tsx';
 import { Auth } from './components/auth/Auth';
 import { Profile } from './components/chat/Profile';
 import { Message } from './types';
+import { auth } from './lib/firebase';
+import { onAuthStateChanged, signOut, User } from 'firebase/auth';
+
 
 export type ViewType = 'chat' | 'settings' | 'profile';
 
@@ -21,23 +24,26 @@ const initialMessagesData: Record<string, Message[]> = {
 };
 
 const App: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('nexchat-auth') === 'true';
-  });
-  
+  const [user, setUser] = useState<User | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
+
   const [activeView, setActiveView] = useState<ViewType>('chat');
   const [activeId, setActiveId] = useState<string>('general');
   const [activeName, setActiveName] = useState<string>('general');
   const [isChannel, setIsChannel] = useState<boolean>(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  
+
   const [channels, setChannels] = useState<string[]>(['general', 'design-team', 'development', 'random']);
   const [mutedChats, setMutedChats] = useState<Set<string>>(new Set());
   const [allMessages, setAllMessages] = useState<Record<string, Message[]>>(initialMessagesData);
 
   useEffect(() => {
-    localStorage.setItem('nexchat-auth', isAuthenticated.toString());
-  }, [isAuthenticated]);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      setUser(firebaseUser);
+      setIsInitializing(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const handleSelectConversation = (id: string, name: string, isChan: boolean) => {
     setActiveId(id);
@@ -61,7 +67,7 @@ const App: React.FC = () => {
       const newMessages = { ...allMessages };
       delete newMessages[id];
       setAllMessages(newMessages);
-      
+
       if (activeId === id) {
         handleSelectConversation('general', 'general', true);
       }
@@ -75,19 +81,31 @@ const App: React.FC = () => {
     setMutedChats(newMuted);
   };
 
-  const handleLogout = () => {
-    setIsAuthenticated(false);
-    setActiveView('chat');
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      setActiveView('chat');
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
   };
 
-  if (!isAuthenticated) {
-    return <Auth onLogin={() => setIsAuthenticated(true)} />;
+  if (isInitializing) {
+    return (
+      <div className="h-screen w-full flex items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth onLogin={() => { }} />;
   }
 
   return (
     <div className="flex h-screen w-full bg-background overflow-hidden @container transition-all duration-300 relative">
       {isMobileSidebarOpen && (
-        <div 
+        <div
           className="lg:hidden absolute inset-0 bg-black/50 backdrop-blur-sm z-40 transition-all animate-in fade-in duration-300"
           onClick={() => setIsMobileSidebarOpen(false)}
         />
@@ -97,9 +115,9 @@ const App: React.FC = () => {
         fixed inset-y-0 left-0 z-50 transform lg:relative lg:translate-x-0 transition-transform duration-300 ease-in-out
         ${isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
       `}>
-        <Sidebar 
+        <Sidebar
           channels={channels}
-          activeId={activeId} 
+          activeId={activeId}
           activeView={activeView}
           mutedChats={mutedChats}
           onSelect={handleSelectConversation}
@@ -118,9 +136,9 @@ const App: React.FC = () => {
 
       <main className="flex-1 flex flex-col min-w-0 relative h-full">
         {activeView === 'chat' && (
-          <ChatWindow 
-            id={activeId} 
-            name={activeName} 
+          <ChatWindow
+            id={activeId}
+            name={activeName}
             isChannel={isChannel}
             isMuted={mutedChats.has(activeId)}
             messages={allMessages[activeId] || []}
